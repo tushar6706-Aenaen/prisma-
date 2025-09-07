@@ -1,12 +1,12 @@
 import express from 'express';
 import { Prisma, PrismaClient } from '@prisma/client';
-
+const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 const app = express();
-const PORT = 4000;
 
 
-app.get('/', async (_, res) => {
+
+app.get('/users', async (req, res) => {
   const users = await prisma.user.findMany({
     where: {
       age: {
@@ -24,15 +24,40 @@ app.get('/', async (_, res) => {
     // where: {
     //   nationality: { NOT: "Irish" }
     // },
-     where: {
+    where: {
       nationality: {
-        in:["Indian", "Italian", "Mexican"]
+        in: ["Indian", "Italian", "Mexican"]
       }
     },
   });
   res.json(users);
 }
 );
+
+
+app.put('/users', async (req, res) => {
+  const updatedUser = await prisma.user.update({
+    where: { email: "alice.johnson@example.com" },
+    data: {
+      age: 35,
+      isMarried: true,
+    },
+  });
+  res.json(updatedUser);
+});
+
+app.delete('/users', async (req, res) => {
+  const deletedUser = await prisma.user.deleteMany({
+    // where: {
+    //   email: "david.kim@example.com",
+    // },
+    where:{
+      age : {gt:30},
+    }
+  });
+  res.json(deletedUser);
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
